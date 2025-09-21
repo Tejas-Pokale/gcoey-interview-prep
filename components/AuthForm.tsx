@@ -3,44 +3,55 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
 import { z } from "zod";
 import Image from "next/image";
 import Link from "next/link";
+import { toast } from "sonner";
+import FormField from "./FormField";
+import { useRouter } from "next/navigation";
 
-const formSchema = z.object({
-  username: z.string().min(2).max(50),
-});
+const authFormSchema = (type: FormType) => {
+  return z.object({
+    name: type === "sign-up" ? z.string().min(3) : z.string().optional(),
+    email: z.string().email(),
+    password: z.string().min(3),
+  });
+};
 
-const AuthForm = ({type} : {type : FormType}) => {
+const AuthForm = ({ type }: { type: FormType }) => {
+  const router = useRouter();
+  const formSchema = authFormSchema(type);
+
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      name: "",
+      email: "",
+      password: "",
     },
   });
 
   // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+    try {
+      if (type === "sign-up") {
+        toast.success("Account created successfully! Please sign in.");
+        router.replace('/sign-in')
+      } else {
+        toast.success("Sign In successfully.");
+        router.replace('/')
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong : ${error}");
+    }
   }
 
-  const isSignIn = (type === "sign-in");
-
-  console.log(isSignIn);
+  const isSignIn = type === "sign-in";
 
   return (
     <div className="card-border lg:min-w-[566px]">
@@ -52,18 +63,44 @@ const AuthForm = ({type} : {type : FormType}) => {
         <h3>Practice Job Interview with AI</h3>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6 mt-4 form">
-            {!isSignIn &&  <p>Name</p>}
-            <p>Email</p>
-            <p>Password</p>
-            <Button type="submit" className="btn">{isSignIn ? 'Sign In' : 'Create an account'}</Button>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="w-full space-y-6 mt-4 form"
+          >
+            {!isSignIn && (
+              <FormField
+                control={form.control}
+                name="name"
+                label="Name"
+                placeholder="Your name"
+              />
+            )}
+           <FormField
+                control={form.control}
+                name="email"
+                label="Email"
+                placeholder="Your email"
+              />
+            <FormField
+                control={form.control}
+                name="password"
+                label="Password"
+                placeholder="Enter your password"
+                type="password"
+              />
+            <Button type="submit" className="btn">
+              {isSignIn ? "Sign In" : "Create an account"}
+            </Button>
           </form>
         </Form>
         <p className="text-center">
-          {isSignIn ? 'No account yet?' : 'Have an Account already?'}
-          <Link href={!isSignIn ? '/sign-in' : '/sign-up'} className="font-bold text-user-primary ml-1" >
-            {!isSignIn ? 'Sign in' : 'Sign up'}
-            </Link>
+          {isSignIn ? "No account yet?" : "Have an Account already?"}
+          <Link
+            href={!isSignIn ? "/sign-in" : "/sign-up"}
+            className="font-bold text-user-primary ml-1"
+          >
+            {!isSignIn ? "Sign in" : "Sign up"}
+          </Link>
         </p>
       </div>
     </div>
