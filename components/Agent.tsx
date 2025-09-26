@@ -1,12 +1,12 @@
-"use client";
+'use client'
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { set } from "zod";
 import Vapi from "@vapi-ai/web";
 import { interviewer } from "@/constants";
+import { createFeedback } from "@/lib/actions/general.action";
 
 enum CallStatus {
   INACTIVE = "INACTIVE",
@@ -49,7 +49,7 @@ const Agent = ({
     const onSpeechEnd = () => setSpeaking(false);
 
     const onError = (error: Error) => {
-      console.error(error);
+      console.log(error);
       setCallStatus(CallStatus.FINISHED);
     };
 
@@ -72,10 +72,11 @@ const Agent = ({
 
   const handleGenerateFeedback = async (messages: SavedMessage[]) => {
     console.log("Generate feedback here...");
-    const { success, id } = {
-      success: true,
-      id: "feedback-id",
-    };
+    const { success, feedbackId: id } = await createFeedback({
+      interviewId: interviewId!,
+      userId: userId!,
+      transcript: messages,
+    })
 
     if (success && id) {
       router.push(`/interview/${interviewId}/feedback`);

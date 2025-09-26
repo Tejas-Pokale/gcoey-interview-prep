@@ -155,38 +155,36 @@ End the conversation on a polite and positive note.
   },
 };
 
-export const feedbackSchema = z.object({
-  totalScore: z.number(),
-  categoryScores: z.tuple([
-    z.object({
-      name: z.literal("Communication Skills"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-    z.object({
-      name: z.literal("Technical Knowledge"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-    z.object({
-      name: z.literal("Problem Solving"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-    z.object({
-      name: z.literal("Cultural Fit"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-    z.object({
-      name: z.literal("Confidence and Clarity"),
-      score: z.number(),
-      comment: z.string(),
-    }),
+// 1. Define a schema for a SINGLE category score object.
+// Use z.enum to give the AI a list of valid category names to choose from.
+const categoryScoreSchema = z.object({
+  name: z.enum([
+    "Communication Skills",
+    "Technical Knowledge",
+    "Problem Solving",
+    "Cultural Fit",
+    "Confidence and Clarity",
   ]),
-  strengths: z.array(z.string()),
-  areasForImprovement: z.array(z.string()),
-  finalAssessment: z.string(),
+  score: z.number().describe("The score from 0 to 100 for this category."),
+  comment: z.string().describe("A brief comment justifying the score for this category."),
+});
+
+
+// 2. Define your main feedback schema using z.array() for the category scores.
+export const feedbackSchema = z.object({
+  totalScore: z.number().describe("The final combined score for the candidate, from 0 to 100."),
+
+  categoryScores: z.array(categoryScoreSchema)
+    .describe("An array of scores, one for each evaluation category."),
+
+  strengths: z.array(z.string())
+    .describe("A list of the candidate's key strengths."),
+
+  areasForImprovement: z.array(z.string())
+    .describe("A list of specific areas where the candidate can improve."),
+
+  finalAssessment: z.string()
+    .describe("A final, overall summary of the candidate's performance."),
 });
 
 export const interviewCovers = [

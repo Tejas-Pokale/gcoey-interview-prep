@@ -1,3 +1,4 @@
+
 import Agent from "@/components/Agent";
 import DisplayTechIcons from "@/components/DisplayTechIcons";
 import { getCurrentUser } from "@/lib/actions/auth.action";
@@ -42,6 +43,7 @@ const page = async ({ params }: RouteParams) => {
 
       <Agent
         userName={user?.name!}
+        userId={user?.id!}
         interviewId={id}
         type="interview"
         questions={interview.questions}
